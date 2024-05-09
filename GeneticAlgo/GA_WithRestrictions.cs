@@ -1,11 +1,10 @@
 ﻿using GeneticAlgo.DTO;
-using GeneticAlgo.Interfaces;
-using MathNet.Numerics.Distributions;
 using MathNet.Numerics.LinearAlgebra;
+using GeneticAlgo.Abstract;
 
 namespace GeneticAlgo
 {
-    public class GA_WithRestrictions : IGeneticAlgo
+    public class GA_WithRestrictions : GeneticAlgoBase
     {
         private readonly int PopulationSize;
         private readonly int MaxGenerations;
@@ -14,15 +13,18 @@ namespace GeneticAlgo
         private readonly double MutationAmount;
         private readonly double LargeNumber; // M
         private readonly int StagnationLimit;
+        private readonly int EliteCount;
+        private readonly double ChangeRangePercent;
         private static Random _random = new Random();
+
         private Matrix<double> A;
         private Vector<double> B;
         private Vector<double> C;
         private double _bestFitness;
-        private readonly VariableRange[] _ranges;
-        private int _stagnantGenerations;
+        private readonly VariableRange[] _xRanges;
+        private int _stagnationCount;
 
-        public GA_WithRestrictions(Matrix<double> a, Vector<double> b, Vector<double> c, VariableRange[] ranges, GA_Params parameters)
+        public GA_WithRestrictions(Matrix<double> a, Vector<double> b, Vector<double> c, VariableRange[] xRanges, float variationPercent, GA_Params parameters)
         {
             PopulationSize = parameters.PopulationSize;
             MaxGenerations = parameters.MaxGenerations;
@@ -31,102 +33,107 @@ namespace GeneticAlgo
             MutationAmount = parameters.MutationAmount;
             LargeNumber = parameters.LargeNumber;
             StagnationLimit = parameters.StagnationLimit;
+            EliteCount = parameters.EliteCount;
+            ChangeRangePercent = variationPercent;
+
 
             A = a;
             B = b;
             C = c;
-            _ranges = ranges;
+            _xRanges = xRanges;
 
             _bestFitness = double.PositiveInfinity;
-            _stagnantGenerations = 0;
+            _stagnationCount = 0;
         }
 
-        public GAResult Run()
+        public override GAResult Run()
         {
             var population = InitializePopulation();
-            for (int generation = 0; generation < MaxGenerations && _stagnantGenerations < StagnationLimit; generation++)
+            for (int generation = 0; generation < MaxGenerations && _stagnationCount < StagnationLimit; generation++)
             {
-                var nextPopulation = SelectPopullation(population);
+                var nextPopulation = SelectPopulation(population);
+                var elite = nextPopulation.Take(EliteCount);
+                nextPopulation = nextPopulation.Skip(10).ToList();
+
                 nextPopulation = Crossover(nextPopulation);
-                nextPopulation = Mutate(nextPopulation);
+                Mutate(nextPopulation, _xRanges);
+
+                nextPopulation.AddRange(elite);
+
                 population = nextPopulation;
 
-
                 var currentBest = population.Min(x => ComputeFitness(x));
+                currentGenerationBest?.Invoke(currentBest);
                 if (currentBest < _bestFitness)
                 {
                     _bestFitness = currentBest;
-                    _stagnantGenerations = 0;
+                    _stagnationCount = 0;
                 }
                 else
                 {
-                    _stagnantGenerations++;
+                    _stagnationCount++;
                 }
             }
 
-            var bestIndividual = population.OrderBy(x => ComputeFitness(x)).First();
-            var fitness = ComputeFitness(bestIndividual);
-            return new GAResult(bestIndividual, fitness);
+            var bestAgent = population.OrderBy(x => ComputeFitness(x)).First();
+            var fitness = ComputeFitness(bestAgent);
+            return new GAResult(bestAgent, fitness);
         }
 
-        private Vector<double>[] InitializePopulation()
+        private List<Agent> InitializePopulation()
         {
             return Enumerable.Range(0, PopulationSize).Select(_ =>
-                Vector<double>.Build.Dense(B.Count, i =>
-                _random.NextDouble() * (_ranges[i].Max - _ranges[i].Min) + _ranges[i].Min
-                )).ToArray();
+            {
+                var x = Vector<double>.Build.Dense(B.Count, i =>
+                    _random.NextDouble() * (_xRanges[i].Max - _xRanges[i].Min) + _xRanges[i].Min);
+                return new Agent(A, B, C, x, ChangeRangePercent);
+            }).ToList();
         }
 
-        private double ComputeFitness(Vector<double> x)
+
+        private double ComputeFitness(Agent agent)
         {
             double penalty = 0;
-            for (int i = 0; i < A.RowCount; i++)
+            for (int i = 0; i < agent.A.RowCount; i++)
             {
                 double constraint = 0;
-                for (int j = 0; j < A.ColumnCount; j++)
+                for (int j = 0; j < agent.A.ColumnCount; j++)
                 {
-                    constraint += A[i, j] * x[j];
+                    constraint += agent.A[i, j] * agent.X[j];
                 }
-                penalty += LargeNumber * Math.Abs(constraint - B[i]);
+                penalty += LargeNumber * Math.Abs(constraint - agent.B[i]);
             }
-            return -C.DotProduct(x) + penalty;
+            return -agent.C.DotProduct(agent.X) + penalty;
         }
 
-        private Vector<double>[] SelectPopullation(Vector<double>[] population)
+        private List<Agent> SelectPopulation(List<Agent> population)
         {
-            return population.OrderBy(x => ComputeFitness(x)).Take((int)(PopulationSize * SelectionAmount)).ToArray();
+            return population.OrderBy(x => ComputeFitness(x)).Take((int)(PopulationSize * SelectionAmount)).ToList();
         }
 
-        private Vector<double>[] Crossover(Vector<double>[] population)
+        private List<Agent> Crossover(List<Agent> population)
         {
-            var nextPopulation = new List<Vector<double>>();
-            while (nextPopulation.Count < PopulationSize)
+            var nextPopulation = new List<Agent>(population);
+
+            while (nextPopulation.Count < PopulationSize - EliteCount)
             {
-                var parent1 = population[_random.Next(population.Length)];
-                var parent2 = population[_random.Next(population.Length)];
+                var parent1 = population[_random.Next(population.Count)];
+                var parent2 = population[_random.Next(population.Count)];
 
-                int crossoverPoint = _random.Next(1, parent1.Count - 1);
-                var child1 = Vector<double>.Build.DenseOfEnumerable(parent1.Take(crossoverPoint).Concat(parent2.Skip(crossoverPoint)));
-                var child2 = Vector<double>.Build.DenseOfEnumerable(parent2.Take(crossoverPoint).Concat(parent1.Skip(crossoverPoint)));
-                nextPopulation.Add(child1);
-                nextPopulation.Add(child2);
+                var result = Agent.Crossover(parent1, parent2);
+
+                nextPopulation.Add(result.Item1);
+                nextPopulation.Add(result.Item2);
             }
-            return nextPopulation.ToArray();
+            return nextPopulation;
         }
 
-        private Vector<double>[] Mutate(Vector<double>[] population)
+        private void Mutate(List<Agent> population, VariableRange[] xRanges)
         {
-            foreach (var individual in population)
+            foreach (var agent in population)
             {
-                if (_random.NextDouble() < MutationRate)
-                {
-                    int index = _random.Next(individual.Count);
-                    double mutation = Normal.Sample(_random, 0, MutationAmount);
-                    double newValue = individual[index] + mutation;
-                    individual[index] = Math.Max(_ranges[index].Min, Math.Min(_ranges[index].Max, newValue));
-                }
+                agent.Mutate(MutationAmount, MutationRate, xRanges);
             }
-            return population;
         }
     }
 }

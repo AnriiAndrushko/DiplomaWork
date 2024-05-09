@@ -2,22 +2,22 @@
 {
     public struct GA_Params
     {
-        public readonly int PopulationSize = 2000;
-        public readonly int MaxGenerations = 1000;
-        public readonly double SelectionAmount = 0.5;
-        public readonly double MutationRate = 0.3;
-        public readonly double MutationAmount = 5;
-        public readonly double LargeNumber = 1000000; // M
-        public readonly int StagnationLimit = 500;
-        public GA_Params() { }
-        public GA_Params(int populationSize, int maxGenerations, double selectionAmount, double mutationRate, double mutationAmount, double largeNumber, double variationKoef, int stagnationLimit)
+        public readonly int PopulationSize;
+        public readonly int MaxGenerations;
+        public readonly double SelectionAmount;
+        public readonly double MutationRate;
+        public readonly double MutationAmount;
+        public readonly double LargeNumber; // M
+        public readonly int StagnationLimit;
+        public readonly int EliteCount;
+        public GA_Params(int populationSize, int maxGenerations, double selectionAmount, double mutationRate, double mutationAmount, double largeNumber, int stagnationLimit, int eliteCount)
         {
-            if (CheckKoefBoundaries(selectionAmount))
-                throw new ArgumentException("Selection Amount must be between 1 and 0");
-            if (CheckKoefBoundaries(mutationRate))
-                throw new ArgumentException("Mutation Rate must be between 1 and 0");
-            if (CheckKoefBoundaries(variationKoef))
-                throw new ArgumentException("Variation Koef must be between 1 and 0");
+            if (!CheckKoefBoundaries(selectionAmount))
+                throw new ArgumentException("Selection Amount must be between 0 and 1");
+            if (!CheckKoefBoundaries(mutationRate))
+                throw new ArgumentException("Mutation Rate must be between 0 and 1");
+            if ((populationSize * selectionAmount) - eliteCount <= 0)
+                throw new ArgumentException("Too small population size for this parameters");
 
             PopulationSize = populationSize;
             MaxGenerations = maxGenerations;
@@ -26,6 +26,7 @@
             MutationAmount = mutationAmount;
             LargeNumber = largeNumber;
             StagnationLimit = stagnationLimit;
+            EliteCount = eliteCount;
         }
         private bool CheckKoefBoundaries(double value)
         {

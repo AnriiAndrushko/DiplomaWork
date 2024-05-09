@@ -5,10 +5,10 @@ namespace GeneticAlgo.DTO
 {
     public struct GAResult
     {
-        public readonly Vector<double> BestResult;
+        public readonly Agent BestResult;
         public readonly double Fitness;
 
-        public GAResult(Vector<double> bestResult, double fitness)
+        public GAResult(Agent bestResult, double fitness)
         {
             BestResult = bestResult;
             Fitness = fitness;
@@ -16,7 +16,7 @@ namespace GeneticAlgo.DTO
         public override string ToString()
         {
             var sb = new StringBuilder();
-            sb.AppendLine("Best Solution: " + BestResult);
+            sb.AppendLine("Best Solution:\n" + BestResult);
             sb.AppendLine("Fitness: " + Fitness);
             return sb.ToString();
         }
