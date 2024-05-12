@@ -55,12 +55,10 @@ namespace GeneticAlgo
             {
                 var nextPopulation = SelectPopulation(population);
                 var elite = nextPopulation.Take(EliteCount);
-                nextPopulation = nextPopulation.Skip(10).ToList();
+                nextPopulation = nextPopulation.Skip(EliteCount).ToList();
 
-                //paralel this
                 nextPopulation = Crossover(nextPopulation);
                 Mutate(nextPopulation, _xRanges);
-                //*******
 
                 nextPopulation.AddRange(elite);
                 population = nextPopulation;
