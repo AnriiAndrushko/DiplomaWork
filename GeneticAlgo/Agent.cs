@@ -141,9 +141,9 @@ namespace GeneticAlgo
             return Math.Max(initialValue * (1 - changeRangePercent), Math.Min(initialValue * (1 + changeRangePercent), mutatedValue));
         }
 
-        private double MutateWithinBounds(double value, double mutationRate, VariableRange xRange)
+        private double MutateWithinBounds(double value, double mutationAmount, VariableRange xRange)
         {
-            double mutation = Normal.Sample(MultithreadRandom.Instance, 0, mutationRate);//todo
+            double mutation = Normal.Sample(MultithreadRandom.Instance, 0, mutationAmount);//todo
             double mutatedValue = value + mutation;
             return Math.Max(xRange.Min, Math.Min(xRange.Max, mutatedValue));
         }

@@ -1,8 +1,6 @@
 ﻿using GeneticAlgo.DTO;
 using MathNet.Numerics.LinearAlgebra;
 using GeneticAlgo.Abstract;
-using System.Diagnostics;
-using System;
 using System.Collections.Concurrent;
 using GeneticAlgo.Utils;
 
@@ -27,7 +25,6 @@ namespace GeneticAlgo
         private readonly VariableRange[] _xRanges;
         private int _stagnationCount;
 
-        private ManualResetEvent resetEvent;
         private CountdownEvent countdownEvent;
 
         public GA_WithRestrictions(Matrix<double> a, Vector<double> b, Vector<double> c, VariableRange[] xRanges, float variationPercent, GA_Params parameters)
@@ -41,8 +38,6 @@ namespace GeneticAlgo
             StagnationLimit = parameters.StagnationLimit;
             EliteCount = parameters.EliteCount;
             ChangeRangePercent = variationPercent;
-
-            resetEvent = new ManualResetEvent(false);
 
             A = a;
             B = b;
@@ -147,22 +142,20 @@ namespace GeneticAlgo
 
         private void Mutate(List<Agent> population, VariableRange[] xRanges)
         {   
-            resetEvent.Reset();
             int toProcess = population.Count;
+            countdownEvent = new CountdownEvent(toProcess);
 
             Action<Agent> mutateAction = agent =>
             {
                 agent.Mutate(MutationAmount, MutationRate, xRanges);
-                if (Interlocked.Decrement(ref toProcess) == 0)
-                    resetEvent.Set();
+                countdownEvent.Signal();
             };
 
             foreach (var agent in population)
             {
                 ThreadPool.QueueUserWorkItem(_ => mutateAction(agent));
             }
-
-            resetEvent.WaitOne();
+            countdownEvent.Wait();
         }
     }
 }

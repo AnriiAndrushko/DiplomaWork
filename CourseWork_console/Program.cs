@@ -2,20 +2,21 @@
 using GeneticAlgo.DTO;
 using MathNet.Numerics.LinearAlgebra;
 using GeneticAlgo.Abstract;
+using MathNet.Numerics.Distributions;
 
 Random random = new Random();
 
 // Крок 1: Генерація матриці A
-var A = GenerateNonSingularMatrix(3, 3);
+var A = GenerateNonSingularMatrix(10, 10);
 
 // Крок 2: Генерація розв'язку x0
-var x0 = Vector<double>.Build.Dense(3, i => random.NextDouble() * 100);
+var x0 = Vector<double>.Build.Dense(10, i => random.NextDouble() * 100);
 
 // Крок 3: Формування матриці B
 var B = A * x0;
 
 // Крок 4: Вектор C
-var C = Vector<double>.Build.Dense(3, i => SumColumn(A, i));
+var C = Vector<double>.Build.Dense(10, i => SumColumn(A, i));
 
 //Matrix<double> A = Matrix<double>.Build.DenseOfArray(new double[,] { { 0.5, 0.3 }, 
 //                                                                     { 0.2, 0.6 } });
@@ -41,7 +42,7 @@ GA_Params gaParams = new GA_Params(
     10000,
     0.35,
     0.2,
-    1000,
+    50,
     10000,
     200,
     5
