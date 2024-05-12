@@ -2,6 +2,7 @@
 using MathNet.Numerics.Distributions;
 using System.Text;
 using GeneticAlgo.DTO;
+using GeneticAlgo.Utils;
 
 namespace GeneticAlgo
 {
@@ -17,8 +18,6 @@ namespace GeneticAlgo
         public readonly Vector<double> InitialC;
 
         private readonly double changeRangePercent;//this constant and mutationAmount not because mutationAmount can possibly change in algorythm runtime to find more precise answer
-
-        private static Random _random = new Random();
 
         public Agent(Matrix<double> a, Vector<double> b, Vector<double> c, Vector<double> x, double changeRangePercent)
         {
@@ -54,7 +53,7 @@ namespace GeneticAlgo
 
             for (int i = 0; i < X.Count; i++)
             {
-                if (_random.NextDouble() < mutationRate)
+                if (MultithreadRandom.Instance.NextDouble() < mutationRate)
                 {
                     X[i] = MutateWithinBounds(X[i], mutationAmount, xRanges[i]);
                 }
@@ -64,7 +63,7 @@ namespace GeneticAlgo
 
         public static (Agent, Agent) Crossover(Agent parent1, Agent parent2)
         {
-            int crossoverPoint = _random.Next(1, parent1.X.Count - 1);
+            int crossoverPoint = MultithreadRandom.Instance.Next(1, parent1.X.Count - 1);
 
             // Crossover X
             var child1X = Vector<double>.Build.DenseOfEnumerable(parent1.X.Take(crossoverPoint).Concat(parent2.X.Skip(crossoverPoint)));
@@ -79,12 +78,12 @@ namespace GeneticAlgo
             var child2C = parent2.C.Clone();
 
             // Choose a random row to crossover for matrix A and vector B
-            int matrixCrossoverPoint = _random.Next(1, parent1.A.RowCount);
+            int matrixCrossoverPoint = MultithreadRandom.Instance.Next(1, parent1.A.RowCount);
             CrossoverMatrixRows(child1A, child2A, matrixCrossoverPoint);
             CrossoverVectorElements(child1B, child2B, matrixCrossoverPoint);
 
             // Choose a random index to crossover for vector C
-            int vectorCrossoverPoint = _random.Next(1, parent1.C.Count);
+            int vectorCrossoverPoint = MultithreadRandom.Instance.Next(1, parent1.C.Count);
             CrossoverVectorElements(child1C, child2C, vectorCrossoverPoint);
 
             return (new Agent(child1A, child1B, child1C, child1X, parent1.changeRangePercent, parent1.InitialA, parent1.InitialB, parent1.InitialC),
@@ -116,7 +115,7 @@ namespace GeneticAlgo
             {
                 for (int j = 0; j < matrix.ColumnCount; j++)
                 {
-                    if (_random.NextDouble() < mutationRate)
+                    if (MultithreadRandom.Instance.NextDouble() < mutationRate)
                     {
                         matrix[i, j] = MutateWithinBounds(initialMatrix[i, j]);
                     }
@@ -128,7 +127,7 @@ namespace GeneticAlgo
         {
             for (int i = 0; i < vector.Count; i++)
             {
-                if (_random.NextDouble() < mutationRate)
+                if (MultithreadRandom.Instance.NextDouble() < mutationRate)
                 {
                     vector[i] = MutateWithinBounds(initialVector[i]);
                 }
@@ -137,14 +136,14 @@ namespace GeneticAlgo
 
         private double MutateWithinBounds(double initialValue)
         {
-            double mutation = Normal.Sample(_random, 0, initialValue * changeRangePercent);
+            double mutation = Normal.Sample(MultithreadRandom.Instance, 0, initialValue * changeRangePercent);
             double mutatedValue = initialValue + mutation;
             return Math.Max(initialValue * (1 - changeRangePercent), Math.Min(initialValue * (1 + changeRangePercent), mutatedValue));
         }
 
         private double MutateWithinBounds(double value, double mutationRate, VariableRange xRange)
         {
-            double mutation = Normal.Sample(_random, 0, mutationRate);//todo
+            double mutation = Normal.Sample(MultithreadRandom.Instance, 0, mutationRate);//todo
             double mutatedValue = value + mutation;
             return Math.Max(xRange.Min, Math.Min(xRange.Max, mutatedValue));
         }

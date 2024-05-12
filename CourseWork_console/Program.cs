@@ -6,16 +6,16 @@ using GeneticAlgo.Abstract;
 Random random = new Random();
 
 // Крок 1: Генерація матриці A
-var A = GenerateNonSingularMatrix(7, 7);
+var A = GenerateNonSingularMatrix(3, 3);
 
 // Крок 2: Генерація розв'язку x0
-var x0 = Vector<double>.Build.Dense(7, i => random.NextDouble() * 1000);
+var x0 = Vector<double>.Build.Dense(3, i => random.NextDouble() * 100);
 
 // Крок 3: Формування матриці B
 var B = A * x0;
 
 // Крок 4: Вектор C
-var C = Vector<double>.Build.Dense(7, i => SumColumn(A, i));
+var C = Vector<double>.Build.Dense(3, i => SumColumn(A, i));
 
 //Matrix<double> A = Matrix<double>.Build.DenseOfArray(new double[,] { { 0.5, 0.3 }, 
 //                                                                     { 0.2, 0.6 } });
@@ -37,7 +37,7 @@ VariableRange[] xRanges = new VariableRange[] {
 };
 
 GA_Params gaParams = new GA_Params(
-    20000,
+    40000,
     10000,
     0.35,
     0.2,
@@ -56,7 +56,7 @@ Console.WriteLine(B);
 Console.WriteLine("Vector C:");
 Console.WriteLine(C);
 
-GeneticAlgoBase ga = new GA_WithRestrictions(A, B, C, xRanges, 0.1f, gaParams);
+GeneticAlgoBase ga = new GA_WithRestrictions(A, B, C, xRanges, 0.0f, gaParams);
 
 
 Console.WriteLine("Press any key to begin");
@@ -73,13 +73,15 @@ ga.currentGenerationBest += (currentBest) => {
 var res = ga.Run();
 Console.WriteLine(res);
 
+Console.WriteLine("Vector x0:");
+Console.WriteLine(x0);
 
 Matrix<double> GenerateNonSingularMatrix(int rows, int cols)
 {
     Matrix<double> matrix;
     do
     {
-        matrix = Matrix<double>.Build.Dense(rows, cols, (i, j) => random.NextDouble() * 1000);
+        matrix = Matrix<double>.Build.Dense(rows, cols, (i, j) => random.NextDouble() * 100);
     }
     while (matrix.Determinant() == 0);
     return matrix;

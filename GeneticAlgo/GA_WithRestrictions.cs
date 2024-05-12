@@ -1,6 +1,10 @@
 ﻿using GeneticAlgo.DTO;
 using MathNet.Numerics.LinearAlgebra;
 using GeneticAlgo.Abstract;
+using System.Diagnostics;
+using System;
+using System.Collections.Concurrent;
+using GeneticAlgo.Utils;
 
 namespace GeneticAlgo
 {
@@ -15,7 +19,6 @@ namespace GeneticAlgo
         private readonly int StagnationLimit;
         private readonly int EliteCount;
         private readonly double ChangeRangePercent;
-        private static Random _random = new Random();
 
         private Matrix<double> A;
         private Vector<double> B;
@@ -23,6 +26,9 @@ namespace GeneticAlgo
         private double _bestFitness;
         private readonly VariableRange[] _xRanges;
         private int _stagnationCount;
+
+        private ManualResetEvent resetEvent;
+        private CountdownEvent countdownEvent;
 
         public GA_WithRestrictions(Matrix<double> a, Vector<double> b, Vector<double> c, VariableRange[] xRanges, float variationPercent, GA_Params parameters)
         {
@@ -36,6 +42,7 @@ namespace GeneticAlgo
             EliteCount = parameters.EliteCount;
             ChangeRangePercent = variationPercent;
 
+            resetEvent = new ManualResetEvent(false);
 
             A = a;
             B = b;
@@ -55,11 +62,12 @@ namespace GeneticAlgo
                 var elite = nextPopulation.Take(EliteCount);
                 nextPopulation = nextPopulation.Skip(10).ToList();
 
+                //paralel this
                 nextPopulation = Crossover(nextPopulation);
                 Mutate(nextPopulation, _xRanges);
+                //*******
 
                 nextPopulation.AddRange(elite);
-
                 population = nextPopulation;
 
                 var currentBest = population.Min(x => ComputeFitness(x));
@@ -85,7 +93,7 @@ namespace GeneticAlgo
             return Enumerable.Range(0, PopulationSize).Select(_ =>
             {
                 var x = Vector<double>.Build.Dense(B.Count, i =>
-                    _random.NextDouble() * (_xRanges[i].Max - _xRanges[i].Min) + _xRanges[i].Min);
+                    MultithreadRandom.Instance.NextDouble() * (_xRanges[i].Max - _xRanges[i].Min) + _xRanges[i].Min);
                 return new Agent(A, B, C, x, ChangeRangePercent);
             }).ToList();
         }
@@ -113,27 +121,48 @@ namespace GeneticAlgo
 
         private List<Agent> Crossover(List<Agent> population)
         {
-            var nextPopulation = new List<Agent>(population);
+            var nextPopulation = new ConcurrentBag<Agent>(population);
+            int requiredAdds = PopulationSize - EliteCount - population.Count;
+            countdownEvent = new CountdownEvent(requiredAdds / 2); // Each task adds two agents
 
-            while (nextPopulation.Count < PopulationSize - EliteCount)
+            for (int i = 0; i < requiredAdds / 2; i++)
             {
-                var parent1 = population[_random.Next(population.Count)];
-                var parent2 = population[_random.Next(population.Count)];
+                ThreadPool.QueueUserWorkItem(_ =>
+                {
+                    var parent1 = population[MultithreadRandom.Instance.Next(population.Count)];
+                    var parent2 = population[ MultithreadRandom.Instance.Next(population.Count)];
 
-                var result = Agent.Crossover(parent1, parent2);
+                    var result = Agent.Crossover(parent1, parent2);
 
-                nextPopulation.Add(result.Item1);
-                nextPopulation.Add(result.Item2);
+                    nextPopulation.Add(result.Item1);
+                    nextPopulation.Add(result.Item2);
+                    countdownEvent.Signal();
+                });
             }
-            return nextPopulation;
+
+            countdownEvent.Wait();
+
+            return new List<Agent>(nextPopulation);
         }
 
         private void Mutate(List<Agent> population, VariableRange[] xRanges)
-        {
-            foreach (var agent in population)
+        {   
+            resetEvent.Reset();
+            int toProcess = population.Count;
+
+            Action<Agent> mutateAction = agent =>
             {
                 agent.Mutate(MutationAmount, MutationRate, xRanges);
+                if (Interlocked.Decrement(ref toProcess) == 0)
+                    resetEvent.Set();
+            };
+
+            foreach (var agent in population)
+            {
+                ThreadPool.QueueUserWorkItem(_ => mutateAction(agent));
             }
+
+            resetEvent.WaitOne();
         }
     }
 }
