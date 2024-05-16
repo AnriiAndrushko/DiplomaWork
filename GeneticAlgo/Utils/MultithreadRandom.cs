@@ -9,7 +9,7 @@
         {
             get
             {
-                return Local ?? (Local = new Random());
+                return Local ?? (Local = new Random(Guid.NewGuid().GetHashCode()));
             }
         }
     }

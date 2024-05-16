@@ -123,7 +123,7 @@ namespace GeneticAlgo
                 ThreadPool.QueueUserWorkItem(_ =>
                 {
                     var parent1 = population[MultithreadRandom.Instance.Next(population.Count)];
-                    var parent2 = population[ MultithreadRandom.Instance.Next(population.Count)];
+                    var parent2 = population[MultithreadRandom.Instance.Next(population.Count)];
 
                     var result = Agent.Crossover(parent1, parent2);
 

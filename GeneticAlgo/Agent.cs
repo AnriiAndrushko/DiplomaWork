@@ -17,7 +17,7 @@ namespace GeneticAlgo
         public readonly Vector<double> InitialB;
         public readonly Vector<double> InitialC;
 
-        private readonly double changeRangePercent;//this constant and mutationAmount not because mutationAmount can possibly change in algorythm runtime to find more precise answer
+        private readonly double changeRangePercent;//this constant and mutationAmount not because mutationAmount can possibly change in algorythm runtime to find more precise answer (TODO)
 
         public Agent(Matrix<double> a, Vector<double> b, Vector<double> c, Vector<double> x, double changeRangePercent)
         {
@@ -65,11 +65,9 @@ namespace GeneticAlgo
         {
             int crossoverPoint = MultithreadRandom.Instance.Next(1, parent1.X.Count - 1);
 
-            // Crossover X
             var child1X = Vector<double>.Build.DenseOfEnumerable(parent1.X.Take(crossoverPoint).Concat(parent2.X.Skip(crossoverPoint)));
             var child2X = Vector<double>.Build.DenseOfEnumerable(parent2.X.Take(crossoverPoint).Concat(parent1.X.Skip(crossoverPoint)));
 
-            // Crossover matrices A, B, and C
             var child1A = parent1.A.Clone();
             var child1B = parent1.B.Clone();
             var child1C = parent1.C.Clone();
@@ -77,12 +75,10 @@ namespace GeneticAlgo
             var child2B = parent2.B.Clone();
             var child2C = parent2.C.Clone();
 
-            // Choose a random row to crossover for matrix A and vector B
             int matrixCrossoverPoint = MultithreadRandom.Instance.Next(1, parent1.A.RowCount);
             CrossoverMatrixRows(child1A, child2A, matrixCrossoverPoint);
             CrossoverVectorElements(child1B, child2B, matrixCrossoverPoint);
 
-            // Choose a random index to crossover for vector C
             int vectorCrossoverPoint = MultithreadRandom.Instance.Next(1, parent1.C.Count);
             CrossoverVectorElements(child1C, child2C, vectorCrossoverPoint);
 
@@ -141,20 +137,20 @@ namespace GeneticAlgo
             return Math.Max(initialValue * (1 - changeRangePercent), Math.Min(initialValue * (1 + changeRangePercent), mutatedValue));
         }
 
-        private double MutateWithinBounds(double value, double mutationAmount, VariableRange xRange)
+        private double MutateWithinBounds(double value, double mutationAmmount, VariableRange xRange)
         {
-            double mutation = Normal.Sample(MultithreadRandom.Instance, 0, mutationAmount);//todo
+            double mutation = Normal.Sample(MultithreadRandom.Instance, 0, mutationAmmount);//todo
             double mutatedValue = value + mutation;
             return Math.Max(xRange.Min, Math.Min(xRange.Max, mutatedValue));
         }
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine("Initial Matrix A: " + InitialA);
+            //sb.AppendLine("Initial Matrix A: " + InitialA);
             sb.AppendLine("Matrix A: " + A);
-            sb.AppendLine("Initial Matrix B: " + InitialB);
+            //sb.AppendLine("Initial Matrix B: " + InitialB);
             sb.AppendLine("Vector B: " + B);
-            sb.AppendLine("Initial Matrix C: " + InitialC);
+            //sb.AppendLine("Initial Matrix C: " + InitialC);
             sb.AppendLine("Vector C: " + C);
             sb.AppendLine("Vector X: " + X);
             return sb.ToString();

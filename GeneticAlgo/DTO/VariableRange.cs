@@ -2,8 +2,8 @@
 {
     public struct VariableRange
     {
-        public double Min;
-        public double Max;
+        public readonly double Min;
+        public readonly double Max;
 
         public VariableRange(double min, double max)
         {
