@@ -12,7 +12,7 @@ namespace GeneticAlgo
         private readonly int MaxGenerations;
         private readonly double SelectionAmount;
         private readonly double MutationRate;
-        private readonly double MutationAmount;
+        private readonly double MutationAmount;//TODO make it adjustable in run
         private readonly int LargeNumber; // M
         private readonly int StagnationLimit;
         private readonly int EliteCount;

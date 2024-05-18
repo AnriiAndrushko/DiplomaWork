@@ -6,17 +6,18 @@ using GeneticAlgo.Abstract;
 
 Random random = new Random(Guid.NewGuid().GetHashCode());
 
+int matrixSize = 10;
 // Крок 1: Генерація матриці A
-var A = GenerateNonSingularMatrix(10, 10);
+var A = GenerateNonSingularMatrix(matrixSize, matrixSize);
 
 // Крок 2: Генерація розв'язку x0
-var x0 = Vector<double>.Build.Dense(10, i => random.NextDouble() * 2000 - 1000);
+var x0 = Vector<double>.Build.Dense(matrixSize, i => random.NextDouble() * 2000 - 1000);
 
 // Крок 3: Формування матриці B
 var B = A * x0;
 
 // Крок 4: Вектор C
-var C = Vector<double>.Build.Dense(10, i => SumColumn(A, i));
+var C = Vector<double>.Build.Dense(matrixSize, i => SumColumn(A, i));
 
 //Matrix<double> A = Matrix<double>.Build.DenseOfArray(new double[,] { { 0.5, 0.3 },
 //                                                                     { 0.2, 0.6 } });
@@ -24,27 +25,20 @@ var C = Vector<double>.Build.Dense(10, i => SumColumn(A, i));
 //var B = A * x0;
 //var C = Vector<double>.Build.Dense(x0.Count, i => SumColumn(A, i));
 
-VariableRange[] xRanges = new VariableRange[] {
-    new VariableRange(-10000, 10000),
-    new VariableRange(-10000, 10000),
-    new VariableRange(-10000, 10000),
-    new VariableRange(-10000, 10000),
-    new VariableRange(-10000, 10000),
-    new VariableRange(-10000, 10000),
-    new VariableRange(-10000, 10000),
-    new VariableRange(-10000, 10000),
-    new VariableRange(-10000, 10000),
-    new VariableRange(-10000, 10000),
-};
+VariableRange[] xRanges = new VariableRange[matrixSize];
+for (int i =0; i< matrixSize; i++)
+{
+    xRanges[i] = new VariableRange(-10000, 10000);
+}
 
 GA_Params gaParams = new GA_Params(
     10000,
     10000,
-    0.5,
+    0.35,
     0.1,
-    100,
+    50,
     10000,
-    200,
+    250,
     5
     );
 
@@ -61,7 +55,7 @@ GeneticAlgoBase ga = new GA_WithRestrictions(A, B, C, xRanges, 0.0f, gaParams);
 
 
 Console.WriteLine("Press any key to begin");
-//Console.ReadKey();
+Console.ReadKey();
 
 
 

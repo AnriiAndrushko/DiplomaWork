@@ -196,7 +196,7 @@ namespace GeneticAlgo
 
         private double MutateWithinBounds(double initialValue)
         {
-            double mutation = Normal.Sample(MultithreadRandom.Instance, 0, initialValue * changeRangePercent);
+            double mutation = Normal.Sample(MultithreadRandom.Instance, 0, Math.Abs(initialValue * changeRangePercent));
             double mutatedValue = initialValue + mutation;
             return Math.Max(initialValue * (1 - changeRangePercent), Math.Min(initialValue * (1 + changeRangePercent), mutatedValue));
         }
@@ -225,11 +225,11 @@ namespace GeneticAlgo
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            //sb.AppendLine("Initial Matrix A: " + InitialA);
+            sb.AppendLine("Initial Matrix A: " + InitialA);
             sb.AppendLine("Matrix A: " + A);
-            //sb.AppendLine("Initial Matrix B: " + InitialB);
+            sb.AppendLine("Initial Matrix B: " + InitialB);
             sb.AppendLine("Vector B: " + B);
-            //sb.AppendLine("Initial Matrix C: " + InitialC);
+            sb.AppendLine("Initial Matrix C: " + InitialC);
             sb.AppendLine("Vector C: " + C);
             sb.AppendLine("Vector X: " + X);
             return sb.ToString();
