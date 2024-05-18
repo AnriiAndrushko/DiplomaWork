@@ -7,10 +7,10 @@
         public readonly double SelectionAmount;
         public readonly double MutationRate;
         public readonly double MutationAmount;
-        public readonly double LargeNumber; // M
+        public readonly int LargeNumber; // M
         public readonly int StagnationLimit;
         public readonly int EliteCount;
-        public GA_Params(int populationSize, int maxGenerations, double selectionAmount, double mutationRate, double mutationAmount, double largeNumber, int stagnationLimit, int eliteCount)
+        public GA_Params(int populationSize, int maxGenerations, double selectionAmount, double mutationRate, double mutationAmount, int largeNumber, int stagnationLimit, int eliteCount)
         {
             if (!CheckKoefBoundaries(selectionAmount))
                 throw new ArgumentException("Selection Amount must be between 0 and 1");

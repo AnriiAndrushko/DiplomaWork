@@ -38,7 +38,7 @@ VariableRange[] xRanges = new VariableRange[] {
 };
 
 GA_Params gaParams = new GA_Params(
-    40000,
+    10000,
     10000,
     0.5,
     0.1,
@@ -61,7 +61,7 @@ GeneticAlgoBase ga = new GA_WithRestrictions(A, B, C, xRanges, 0.0f, gaParams);
 
 
 Console.WriteLine("Press any key to begin");
-Console.ReadKey();
+//Console.ReadKey();
 
 
 
