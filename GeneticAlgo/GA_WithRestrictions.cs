@@ -80,10 +80,6 @@ namespace GeneticAlgo
                 {
                     _stagnationCount++;
                 }
-
-                Console.WriteLine("taken: "+_agentPool.taken);
-                Console.WriteLine("created: "+_agentPool.created);
-                Console.WriteLine("returned: "+_agentPool.returned);
             }
 
             var bestAgent = population.OrderBy(x => x.Fitness).First();
@@ -107,17 +103,12 @@ namespace GeneticAlgo
             int lastIndex = numberOfAgentsToSelect - 1;
             var sorted = new SortedListWithDuplicates<double, Agent>();
 
-            int c1 = 0;
-            int c2 = 0;
-            int c3 = 0;
             for (int i = population.Count-1; i >= 0; i--)
             {
-                //Console.WriteLine(minHeap.Count);
                 if (sorted.Count < numberOfAgentsToSelect)
                 {
                     var toAdd = population.ElementAt(i);
                     sorted.Add(toAdd.Fitness, toAdd);
-                    //c3++;
                 }
                 else if (population.ElementAt(i).Fitness < sorted.ElementAt(lastIndex).Value.Fitness)
                 {
@@ -125,18 +116,13 @@ namespace GeneticAlgo
                     sorted.RemoveAt(lastIndex);
                     var toAdd = population.ElementAt(i);
                     sorted.Add(toAdd.Fitness, toAdd);
-                    c1++;
                 }
                 else
                 {
                     _agentPool.ReturnAgent(population.ElementAt(i));
-                    c2++;
                 }
 
             }
-            Console.WriteLine("c1 " + c1 + " c2 " + c2+" s "+(c1+c2));
-            Console.WriteLine("c3 " + c3);
-            Console.ReadKey();
             return new ConcurrentBag<Agent>(sorted.Values);
         }
 

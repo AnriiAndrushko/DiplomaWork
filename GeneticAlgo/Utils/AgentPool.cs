@@ -14,10 +14,6 @@ namespace GeneticAlgo.Utils
         private readonly VariableRange[] _xRanges;
         private readonly double _changeRangePercent;
 
-        public int taken = 0;
-        public int created = 0;
-        public int returned = 0;
-
         public AgentPool(int initialSize, Matrix<double> a, Vector<double> b, Vector<double> c, VariableRange[] xRanges, double changeRangePercent, int largeNumber)
         {
             _agents = new ConcurrentBag<Agent>();
@@ -38,7 +34,6 @@ namespace GeneticAlgo.Utils
         {
             if (_agents.TryTake(out var agent))
             {
-                taken++;
                 return agent;
             }
 
@@ -47,13 +42,11 @@ namespace GeneticAlgo.Utils
 
         public void ReturnAgent(Agent agent)
         {
-            returned++;
             _agents.Add(agent);
         }
 
         private Agent CreateNewAgent()
         {
-            created++;
             var x = Vector<double>.Build.Dense(_initialB.Count, i =>
                 MultithreadRandom.Instance.NextDouble() * (_xRanges[i].Max - _xRanges[i].Min) + _xRanges[i].Min);
             return new Agent(_initialA, _initialB, _initialC, x, _changeRangePercent, LargeNumber);
