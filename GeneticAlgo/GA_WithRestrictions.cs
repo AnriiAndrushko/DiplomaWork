@@ -52,21 +52,17 @@ namespace GeneticAlgo
 
         public override GAResult Run()
         {
-            ConcurrentBag<Agent> population = InitializePopulation();
+            List<Agent> population = InitializePopulation();
             for (int generation = 0; generation < MaxGenerations && _stagnationCount < StagnationLimit; generation++)
             {
                 var nextPopulation = SelectPopulation(population);
-                var elite = nextPopulation.TakeLast(EliteCount);
-                nextPopulation = new ConcurrentBag<Agent>(nextPopulation.SkipLast(EliteCount));
+                var elite = nextPopulation.Take(EliteCount);
+                nextPopulation = new List<Agent>(nextPopulation.Skip(EliteCount));
 
                 nextPopulation = Crossover(nextPopulation);
                 Mutate(nextPopulation, _xRanges);
 
-                foreach (var a in elite)
-                {
-                    nextPopulation.Add(a);
-                }
-
+                nextPopulation.AddRange(elite);
                 population = nextPopulation;
 
                 var currentBest = population.Min(x => x.Fitness);
@@ -87,9 +83,9 @@ namespace GeneticAlgo
             return new GAResult(bestAgent, fitness);
         }
 
-        private ConcurrentBag<Agent> InitializePopulation()
+        private List<Agent> InitializePopulation()
         {
-            var agents = new ConcurrentBag<Agent>();
+            var agents = new List<Agent>();
             for (int i =0; i<PopulationSize; i++)
             {
                 agents.Add(_agentPool.GetAgent());
@@ -97,7 +93,7 @@ namespace GeneticAlgo
             return agents;
         }
 
-        private ConcurrentBag<Agent> SelectPopulation(ConcurrentBag<Agent> population)
+        private List<Agent> SelectPopulation(List<Agent> population)
         {
             int numberOfAgentsToSelect = (int)(PopulationSize * SelectionAmount);
             int lastIndex = numberOfAgentsToSelect - 1;
@@ -123,10 +119,10 @@ namespace GeneticAlgo
                 }
 
             }
-            return new ConcurrentBag<Agent>(sorted.Values);
+            return new List<Agent>(sorted.Values);
         }
 
-        private ConcurrentBag<Agent> Crossover(ConcurrentBag<Agent> population)
+        private List<Agent> Crossover(List<Agent> population)
         {
             var nextPopulation = new ConcurrentBag<Agent>(population);
             int requiredAdds = PopulationSize - EliteCount - population.Count;
@@ -137,11 +133,8 @@ namespace GeneticAlgo
                 ThreadPool.QueueUserWorkItem(_ =>
                 {
                     var parent1 = population.ElementAt(MultithreadRandom.Instance.Next(population.Count));
-
                     var parent2 = population.ElementAt(MultithreadRandom.Instance.Next(population.Count));
-
                     var result = Agent.Crossover(parent1, parent2, _agentPool);
-
                     nextPopulation.Add(result.Item1);
                     nextPopulation.Add(result.Item2);
                     countdownEvent.Signal();
@@ -150,10 +143,10 @@ namespace GeneticAlgo
 
             countdownEvent.Wait();
 
-            return nextPopulation;
+            return nextPopulation.ToList();
         }
 
-        private void Mutate(ConcurrentBag<Agent> population, VariableRange[] xRanges)
+        private void Mutate(List<Agent> population, VariableRange[] xRanges)
         {   
             int toProcess = population.Count;
             countdownEvent = new CountdownEvent(toProcess);
