@@ -6,23 +6,23 @@ using GeneticAlgo.Abstract;
 
 Random random = new Random(Guid.NewGuid().GetHashCode());
 
-// Крок 1: Генерація матриці A
-var A = GenerateNonSingularMatrix(10, 10);
+//// Крок 1: Генерація матриці A
+//var A = GenerateNonSingularMatrix(10, 10);
 
-// Крок 2: Генерація розв'язку x0
-var x0 = Vector<double>.Build.Dense(10, i => random.NextDouble() * 2000 - 1000);
+//// Крок 2: Генерація розв'язку x0
+//var x0 = Vector<double>.Build.Dense(10, i => random.NextDouble() * 2000 - 1000);
 
-// Крок 3: Формування матриці B
-var B = A * x0;
-
-// Крок 4: Вектор C
-var C = Vector<double>.Build.Dense(10, i => SumColumn(A, i));
-
-//Matrix<double> A = Matrix<double>.Build.DenseOfArray(new double[,] { { 0.5, 0.3 },
-//                                                                     { 0.2, 0.6 } });
-//var x0 = Vector<double>.Build.DenseOfArray(new double[] { 10, 10 });
+//// Крок 3: Формування матриці B
 //var B = A * x0;
-//var C = Vector<double>.Build.Dense(x0.Count, i => SumColumn(A, i));
+
+//// Крок 4: Вектор C
+//var C = Vector<double>.Build.Dense(10, i => SumColumn(A, i));
+
+Matrix<double> A = Matrix<double>.Build.DenseOfArray(new double[,] { { 0.5, 0.3 },
+                                                                     { 0.2, 0.6 } });
+var x0 = Vector<double>.Build.DenseOfArray(new double[] { 10, 10 });
+var B = A * x0;
+var C = Vector<double>.Build.Dense(x0.Count, i => SumColumn(A, i));
 
 VariableRange[] xRanges = new VariableRange[] {
     new VariableRange(-10000, 10000),
@@ -38,7 +38,7 @@ VariableRange[] xRanges = new VariableRange[] {
 };
 
 GA_Params gaParams = new GA_Params(
-    10000,
+    1000,
     10000,
     0.5,
     0.1,

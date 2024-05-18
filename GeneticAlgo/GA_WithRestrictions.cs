@@ -101,21 +101,21 @@ namespace GeneticAlgo
         {
             int numberOfAgentsToSelect = (int)(PopulationSize * SelectionAmount);
             int lastIndex = numberOfAgentsToSelect - 1;
-            var sorted = new SortedListWithDuplicates<double, Agent>();
+            var sorted = new SortedListWithDuplicates<Agent>();
 
             for (int i = population.Count-1; i >= 0; i--)
             {
                 if (sorted.Count < numberOfAgentsToSelect)
                 {
                     var toAdd = population.ElementAt(i);
-                    sorted.Add(toAdd.Fitness, toAdd);
+                    sorted.Add(toAdd);
                 }
-                else if (population.ElementAt(i).Fitness < sorted.ElementAt(lastIndex).Value.Fitness)
+                else if (population.ElementAt(i).Fitness < sorted.ElementAt(lastIndex).Fitness)
                 {
-                    _agentPool.ReturnAgent(sorted.ElementAt(lastIndex).Value);
+                    _agentPool.ReturnAgent(sorted.ElementAt(lastIndex));
                     sorted.RemoveAt(lastIndex);
                     var toAdd = population.ElementAt(i);
-                    sorted.Add(toAdd.Fitness, toAdd);
+                    sorted.Add(toAdd);
                 }
                 else
                 {

@@ -1,54 +1,37 @@
-﻿using System.Security.Cryptography;
-
-namespace GeneticAlgo.Utils
+﻿namespace GeneticAlgo.Utils
 {
-    internal class SortedListWithDuplicates<K, T> where K : IComparable
+    internal class SortedListWithDuplicates<T> where T : IComparable
     {
-        public IEnumerable<K> Keys
-        {
-            get
-            {
-                foreach (var pair in _list)
-                {
-                    yield return pair.Key;
-                }
-            }
-        }
-
         public IEnumerable<T> Values
         {
             get
             {
-                foreach (var pair in _list)
-                {
-                    yield return pair.Value;
-                }
+                return _list;
             }
         }
 
         public int Count => _list.Count;
 
-        private List<KeyValuePair<K, T>> _list;
+        private List<T> _list;
 
         public SortedListWithDuplicates()
         {
-            _list = new List<KeyValuePair<K, T>>();
+            _list = new List<T>();
         }
 
-        public void Add(K key, T value)
+        public void Add(T value)
         {
-            var pair = new KeyValuePair<K, T>(key, value);
-            int index = _list.BinarySearch(pair, new KeyComparer());
+            int index = _list.BinarySearch(value, new KeyComparer());
 
             if (index < 0)
             {
                 index = ~index;
             }
 
-            _list.Insert(index, pair);
+            _list.Insert(index, value);
         }
 
-        public KeyValuePair<K, T> ElementAt(int index)
+        public T ElementAt(int index)
         {
             if (index < 0 || index >= _list.Count)
             {
@@ -66,11 +49,11 @@ namespace GeneticAlgo.Utils
         }
 
 
-        private class KeyComparer : IComparer<KeyValuePair<K, T>>
+        private class KeyComparer : IComparer<T>
         {
-            public int Compare(KeyValuePair<K, T> x, KeyValuePair<K, T> y)
+            public int Compare(T x, T y)
             {
-                return x.Key.CompareTo(y.Key);
+                return x.CompareTo(y);
             }
         }
     }
