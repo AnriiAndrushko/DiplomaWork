@@ -6,39 +6,44 @@ using GeneticAlgo.Abstract;
 
 Random random = new Random(Guid.NewGuid().GetHashCode());
 
-for (int j = 0; j < 10; j++)
+int matrixSize = 10;
+// Крок 1: Генерація матриці A
+var A = GenerateNonSingularMatrix(matrixSize, matrixSize);
+
+// Крок 2: Генерація розв'язку x0
+var x0 = Vector<double>.Build.Dense(matrixSize, i => random.NextDouble() * 2000 - 1000);
+
+// Крок 3: Формування матриці B
+var B = A * x0;
+
+// Крок 4: Вектор C
+var C = Vector<double>.Build.Dense(matrixSize, i => SumColumn(A, i));
+
+//Matrix<double> A = Matrix<double>.Build.DenseOfArray(new double[,] { { 0.5, 0.3 },
+//                                                                     { 0.2, 0.6 } });
+//var x0 = Vector<double>.Build.DenseOfArray(new double[] { 10, 10 });
+//var B = A * x0;
+//var C = Vector<double>.Build.Dense(x0.Count, i => SumColumn(A, i));
+
+VariableRange[] xRanges = new VariableRange[matrixSize];
+for (int i = 0; i < matrixSize; i++)
 {
-    int matrixSize = 5;
-    // Крок 1: Генерація матриці A
-    var A = GenerateNonSingularMatrix(matrixSize, matrixSize);
+    xRanges[i] = new VariableRange(-10000, 10000);
+}
 
-    // Крок 2: Генерація розв'язку x0
-    var x0 = Vector<double>.Build.Dense(matrixSize, i => random.NextDouble() * 2000 - 1000);
 
-    // Крок 3: Формування матриці B
-    var B = A * x0;
 
-    // Крок 4: Вектор C
-    var C = Vector<double>.Build.Dense(matrixSize, i => SumColumn(A, i));
 
-    //Matrix<double> A = Matrix<double>.Build.DenseOfArray(new double[,] { { 0.5, 0.3 },
-    //                                                                     { 0.2, 0.6 } });
-    //var x0 = Vector<double>.Build.DenseOfArray(new double[] { 10, 10 });
-    //var B = A * x0;
-    //var C = Vector<double>.Build.Dense(x0.Count, i => SumColumn(A, i));
+for (int j = 0; j < 19; j++)
+{
 
-    VariableRange[] xRanges = new VariableRange[matrixSize];
-    for (int i = 0; i < matrixSize; i++)
-    {
-        xRanges[i] = new VariableRange(-10000, 10000);
-    }
 
     GA_Params gaParams = new GA_Params(
-        10000,
+        5000,
         20000,
         0.35,
-        0.1,
-        100,
+        0.35,
+        50,
         10000,
         350,
         5
@@ -72,8 +77,8 @@ for (int j = 0; j < 10; j++)
 
     watch.Stop();
     var elapsedMs = watch.ElapsedMilliseconds;
-    Console.WriteLine("time: " + elapsedMs);
-    Console.WriteLine("distance between correct answer: " + CalculateAverageDistance(res.BestResult.X, x0));
+    Console.WriteLine(elapsedMs);
+    Console.WriteLine(CalculateAverageDistance(res.BestResult.X, x0));
 }
 //Console.Clear();
 //Console.WriteLine(res);
