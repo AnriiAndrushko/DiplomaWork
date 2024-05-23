@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Console", "CourseWork_conso
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GeneticAlgo", "GeneticAlgo\GeneticAlgo.csproj", "{74099942-E1FC-40F8-B9FC-EE0AAAD42EB0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Win Forms GUI", "Win Forms GUI\Win Forms GUI.csproj", "{B872A684-EA8D-46CD-B96B-B75E2C5D7C43}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Win Forms", "Win Forms\Win Forms.csproj", "{0DDEF6F3-A42B-4F09-A0C6-6EAAD8F90534}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +23,10 @@ Global
 		{74099942-E1FC-40F8-B9FC-EE0AAAD42EB0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{74099942-E1FC-40F8-B9FC-EE0AAAD42EB0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{74099942-E1FC-40F8-B9FC-EE0AAAD42EB0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B872A684-EA8D-46CD-B96B-B75E2C5D7C43}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B872A684-EA8D-46CD-B96B-B75E2C5D7C43}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B872A684-EA8D-46CD-B96B-B75E2C5D7C43}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B872A684-EA8D-46CD-B96B-B75E2C5D7C43}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0DDEF6F3-A42B-4F09-A0C6-6EAAD8F90534}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0DDEF6F3-A42B-4F09-A0C6-6EAAD8F90534}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0DDEF6F3-A42B-4F09-A0C6-6EAAD8F90534}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0DDEF6F3-A42B-4F09-A0C6-6EAAD8F90534}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
