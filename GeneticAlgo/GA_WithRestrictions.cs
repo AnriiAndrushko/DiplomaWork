@@ -28,7 +28,7 @@ namespace GeneticAlgo
 
         private CountdownEvent countdownEvent;
 
-        public GA_WithRestrictions(Matrix<double> a, Vector<double> b, Vector<double> c, VariableRange[] xRanges, float variationPercent, GA_Params parameters)
+        public GA_WithRestrictions(Matrix<double> a, Vector<double> b, Vector<double> c, VariableRange[] xRanges, double variationPercent, GA_Params parameters)
         {
             PopulationSize = parameters.PopulationSize;
             MaxGenerations = parameters.MaxGenerations;

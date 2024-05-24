@@ -1,6 +1,4 @@
-﻿using System;
-using System.Windows.Forms;
-using GeneticAlgo.Abstract;
+﻿using GeneticAlgo.Abstract;
 using GeneticAlgo;
 using GeneticAlgo.DTO;
 using MathNet.Numerics.LinearAlgebra;
@@ -10,15 +8,27 @@ namespace Win_Forms_GUI
     public partial class Form1 : Form
     {
         Random random = new Random(Guid.NewGuid().GetHashCode());
+        private event Action<double> currentGenerationBestHandler;
+        GeneticAlgoBase ga;
         public Form1()
         {
             InitializeComponent();
+            currentGenerationBestHandler = (currentBest) =>
+            {
+                this.BeginInvoke((MethodInvoker)delegate
+                {
+                    LogTextBox.AppendText("Current generation best: " + currentBest + Environment.NewLine);
+                });
+            };
         }
 
         private void startSimBtn_Click(object sender, EventArgs e)
         {
-            int population, maxGenerations, stagnationLimit, eliteCount;
+            int population, maxGenerations, stagnationLimit, eliteCount,
+                matrixSize = 10, xMin, xMax, dMin = -100, dMax = 100;
             double selectionAmount, mutationRate, mutationAmount, variationPercent;
+            VariableRange[] xRanges;
+
             try
             {
                 population = Int32.Parse(PopulationSizeBox.Text);
@@ -29,10 +39,30 @@ namespace Win_Forms_GUI
                 stagnationLimit = Int32.Parse(StagnationLimitBox.Text);
                 eliteCount = Int32.Parse(EliteCountBox.Text);
                 variationPercent = VariationPercentTrack.Value * 0.01;
+                if (checkBox1.Checked)
+                {
+                    matrixSize = Int32.Parse(MatrixSizeBox.Text);
+
+                    xMin = Int32.Parse(DataXDiapasonMinBox.Text);
+                    xMax = Int32.Parse(DataXDiapasonMaxBox.Text);
+                    xRanges = new VariableRange[matrixSize];
+                    for (int i = 0; i < matrixSize; i++)
+                    {
+                        xRanges[i] = new VariableRange(xMin, xMax);
+                    }
+                    dMax = Int32.Parse(DataDiapasonMaxBox.Text);
+                    dMin = Int32.Parse(DataDiapasonMinBox.Text);
+
+                }
+                else
+                {
+                    throw new ArgumentException();
+                    //todo path to file
+                }
             }
             catch
             {
-                LogTextBox.AppendText("Wrong parameters");
+                LogTextBox.AppendText("Wrong parameters" + Environment.NewLine);
                 return;
             }
 
@@ -47,25 +77,16 @@ namespace Win_Forms_GUI
                 stagnationLimit,
                 eliteCount
                 );
-            RunAlgorytm(parameters, variationPercent);
+            Task.Run(() => RunAlgorytm(parameters, variationPercent, xRanges, matrixSize, dMax, dMin));
         }
 
-        void RunAlgorytm(GA_Params parameters, double variationPercent)
+        void RunAlgorytm(GA_Params parameters, double variationPercent, VariableRange[] xRanges, int matrixSize, double dMax, double dMin)
         {
-
-            int matrixSize = 10;
-
-            VariableRange[] xRanges = new VariableRange[matrixSize];
-            for (int i = 0; i < matrixSize; i++)
-            {
-                xRanges[i] = new VariableRange(-10000, 10000);
-            }
-
             // Крок 1: Генерація матриці A
-            var A = GenerateNonSingularMatrix(matrixSize, matrixSize);
+            var A = GenerateNonSingularMatrix(matrixSize, matrixSize, dMax, dMin);
 
             // Крок 2: Генерація розв'язку x0
-            var x0 = Vector<double>.Build.Dense(matrixSize, i => random.NextDouble() * 2000 - 1000);
+            var x0 = Vector<double>.Build.Dense(matrixSize, i => random.NextDouble() * (dMax - dMin) + dMin);
 
             // Крок 3: Формування матриці B
             var B = A * x0;
@@ -73,23 +94,20 @@ namespace Win_Forms_GUI
             // Крок 4: Вектор C
             var C = Vector<double>.Build.Dense(matrixSize, i => SumColumn(A, i));
 
-            GeneticAlgoBase ga = new GA_WithRestrictions(A, B, C, xRanges, 0.0f, parameters);
+            ga = new GA_WithRestrictions(A, B, C, xRanges, variationPercent, parameters);
 
-
-            ga.currentGenerationBest += (currentBest) =>
-            {
-                LogTextBox.AppendText("Current generation best: " + currentBest);
-            };
-
+            ga.currentGenerationBest += currentGenerationBestHandler;
 
             var watch = System.Diagnostics.Stopwatch.StartNew();
             var res = ga.Run();
 
             watch.Stop();
             var elapsedMs = watch.ElapsedMilliseconds;
-
-            LogTextBox.AppendText(elapsedMs.ToString());
-            LogTextBox.AppendText(CalculateAverageDistance(res.BestResult.X, x0).ToString());
+            this.Invoke((MethodInvoker)delegate
+            {
+                LogTextBox.AppendText(elapsedMs.ToString() + Environment.NewLine);
+                LogTextBox.AppendText(CalculateAverageDistance(res.BestResult.X, x0).ToString() + Environment.NewLine);
+            });
         }
 
         static double CalculateAverageDistance(Vector<double> vector1, Vector<double> vector2)
@@ -109,12 +127,12 @@ namespace Win_Forms_GUI
 
             return totalDistance / elementCount;
         }
-        Matrix<double> GenerateNonSingularMatrix(int rows, int cols)
+        Matrix<double> GenerateNonSingularMatrix(int rows, int cols, double dMax, double dMin)
         {
             Matrix<double> matrix;
             do
             {
-                matrix = Matrix<double>.Build.Dense(rows, cols, (i, j) => random.NextDouble() * 2000 - 1000);
+                matrix = Matrix<double>.Build.Dense(rows, cols, (i, j) => random.NextDouble() * (dMax - dMin) + dMin);
             }
             while (matrix.Determinant() == 0);
             return matrix;
@@ -168,6 +186,24 @@ namespace Win_Forms_GUI
         private void VariationPercentTrack_ValueChanged(object sender, EventArgs e)
         {
             VariationPercentLable.Text = VariationPercentTrack.Value.ToString() + "%";
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            if (checkBox1.Checked)
+            {
+                panel1.Visible = false;
+                return;
+            }
+            panel1.Visible = true;
+        }
+
+        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            if (ga != null && ga.currentGenerationBest != null)
+            {
+                ga.currentGenerationBest -= currentGenerationBestHandler;
+            }
         }
     }
 }
