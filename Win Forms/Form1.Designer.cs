@@ -68,6 +68,7 @@
             panel1 = new Panel();
             PathToFileBox = new TextBox();
             label18 = new Label();
+            SelectFileBtn = new Button();
             ((System.ComponentModel.ISupportInitialize)VariationPercentTrack).BeginInit();
             ((System.ComponentModel.ISupportInitialize)MutationRateTrack).BeginInit();
             ((System.ComponentModel.ISupportInitialize)SelectionAmountTrack).BeginInit();
@@ -77,10 +78,10 @@
             // startSimBtn
             // 
             startSimBtn.Font = new Font("Microsoft Sans Serif", 11.25F, FontStyle.Regular, GraphicsUnit.Point, 204);
-            startSimBtn.Location = new Point(331, 453);
+            startSimBtn.Location = new Point(529, 373);
             startSimBtn.Margin = new Padding(4, 3, 4, 3);
             startSimBtn.Name = "startSimBtn";
-            startSimBtn.Size = new Size(120, 70);
+            startSimBtn.Size = new Size(169, 70);
             startSimBtn.TabIndex = 0;
             startSimBtn.Text = "Start simulation";
             startSimBtn.UseVisualStyleBackColor = true;
@@ -94,7 +95,7 @@
             LogTextBox.Name = "LogTextBox";
             LogTextBox.ReadOnly = true;
             LogTextBox.ScrollBars = ScrollBars.Vertical;
-            LogTextBox.Size = new Size(275, 494);
+            LogTextBox.Size = new Size(275, 414);
             LogTextBox.TabIndex = 1;
             // 
             // logLabel
@@ -193,11 +194,9 @@
             VariationPercentTrack.Location = new Point(336, 389);
             VariationPercentTrack.Margin = new Padding(4, 3, 4, 3);
             VariationPercentTrack.Maximum = 99;
-            VariationPercentTrack.Minimum = 1;
             VariationPercentTrack.Name = "VariationPercentTrack";
             VariationPercentTrack.Size = new Size(121, 45);
             VariationPercentTrack.TabIndex = 11;
-            VariationPercentTrack.Value = 35;
             VariationPercentTrack.ValueChanged += VariationPercentTrack_ValueChanged;
             // 
             // MutationRateTrack
@@ -258,9 +257,9 @@
             VariationPercentLable.Location = new Point(372, 417);
             VariationPercentLable.Margin = new Padding(4, 0, 4, 0);
             VariationPercentLable.Name = "VariationPercentLable";
-            VariationPercentLable.Size = new Size(29, 15);
+            VariationPercentLable.Size = new Size(23, 15);
             VariationPercentLable.TabIndex = 19;
-            VariationPercentLable.Text = "35%";
+            VariationPercentLable.Text = "0%";
             // 
             // MutationRateLabel
             // 
@@ -423,7 +422,7 @@
             DataXDiapasonMinBox.Name = "DataXDiapasonMinBox";
             DataXDiapasonMinBox.Size = new Size(116, 23);
             DataXDiapasonMinBox.TabIndex = 39;
-            DataXDiapasonMinBox.Text = "-100";
+            DataXDiapasonMinBox.Text = "-1000";
             // 
             // DataXDiapasonMaxBox
             // 
@@ -432,7 +431,7 @@
             DataXDiapasonMaxBox.Name = "DataXDiapasonMaxBox";
             DataXDiapasonMaxBox.Size = new Size(116, 23);
             DataXDiapasonMaxBox.TabIndex = 38;
-            DataXDiapasonMaxBox.Text = "100";
+            DataXDiapasonMaxBox.Text = "1000";
             // 
             // label16
             // 
@@ -456,9 +455,10 @@
             // 
             // panel1
             // 
+            panel1.Controls.Add(SelectFileBtn);
             panel1.Controls.Add(PathToFileBox);
             panel1.Controls.Add(label18);
-            panel1.Location = new Point(517, 55);
+            panel1.Location = new Point(529, 55);
             panel1.Name = "panel1";
             panel1.Size = new Size(162, 312);
             panel1.TabIndex = 40;
@@ -469,6 +469,7 @@
             PathToFileBox.Location = new Point(13, 19);
             PathToFileBox.Margin = new Padding(4, 3, 4, 3);
             PathToFileBox.Name = "PathToFileBox";
+            PathToFileBox.ReadOnly = true;
             PathToFileBox.Size = new Size(116, 23);
             PathToFileBox.TabIndex = 42;
             // 
@@ -482,11 +483,21 @@
             label18.TabIndex = 41;
             label18.Text = "Path to file";
             // 
+            // SelectFileBtn
+            // 
+            SelectFileBtn.Location = new Point(13, 48);
+            SelectFileBtn.Name = "SelectFileBtn";
+            SelectFileBtn.Size = new Size(75, 23);
+            SelectFileBtn.TabIndex = 43;
+            SelectFileBtn.Text = "Select File";
+            SelectFileBtn.UseVisualStyleBackColor = true;
+            SelectFileBtn.Click += SelectFileBtn_Click;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(703, 532);
+            ClientSize = new Size(703, 448);
             Controls.Add(panel1);
             Controls.Add(DataXDiapasonMinBox);
             Controls.Add(DataXDiapasonMaxBox);
@@ -530,7 +541,7 @@
             MaximizeBox = false;
             Name = "Form1";
             Text = "Genetic algo";
-            FormClosed += Form1_FormClosed;
+            FormClosing += Form1_FormClosing;
             ((System.ComponentModel.ISupportInitialize)VariationPercentTrack).EndInit();
             ((System.ComponentModel.ISupportInitialize)MutationRateTrack).EndInit();
             ((System.ComponentModel.ISupportInitialize)SelectionAmountTrack).EndInit();
@@ -582,6 +593,7 @@
         private Panel panel1;
         private TextBox PathToFileBox;
         private Label label18;
+        private Button SelectFileBtn;
     }
 }
 

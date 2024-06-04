@@ -53,6 +53,7 @@ namespace GeneticAlgo
         public override GAResult Run()
         {
             List<Agent> population = InitializePopulation();
+            int generations = 0;
             for (int generation = 0; generation < MaxGenerations && _stagnationCount < StagnationLimit; generation++)
             {
                 var nextPopulation = SelectPopulation(population);
@@ -66,7 +67,9 @@ namespace GeneticAlgo
                 population = nextPopulation;
 
                 var currentBest = population.Min(x => x.Fitness);
-                currentGenerationBest?.Invoke(currentBest);
+                var currentWorst = population.Max(x => x.Fitness);
+                var currentAvg = population.Average(x => x.Fitness);
+                currentGenerationData?.Invoke(currentAvg, currentWorst);
                 if (currentBest < _bestFitness)
                 {
                     _bestFitness = currentBest;
@@ -76,11 +79,12 @@ namespace GeneticAlgo
                 {
                     _stagnationCount++;
                 }
+                generations++;
             }
 
             var bestAgent = population.OrderBy(x => x.Fitness).First();
             var fitness = bestAgent.Fitness;
-            return new GAResult(bestAgent, fitness);
+            return new GAResult(bestAgent, fitness, generations);
         }
 
         private List<Agent> InitializePopulation()
@@ -140,7 +144,6 @@ namespace GeneticAlgo
                     countdownEvent.Signal();
                 });
             }
-
             countdownEvent.Wait();
 
             return nextPopulation.ToList();

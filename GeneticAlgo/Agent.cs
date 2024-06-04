@@ -153,9 +153,12 @@ namespace GeneticAlgo
         {
             for (int i = crossoverPoint; i < matrix1.RowCount; i++)
             {
-                var tempRow = matrix1.Row(i);
-                matrix1.SetRow(i, matrix2.Row(i));
-                matrix2.SetRow(i, tempRow);
+                for (int j = 0; j< matrix1.RowCount; j++)
+                {
+                    var tmp = matrix1[i, j];
+                    matrix1[i, j] = matrix2[i, j];
+                    matrix2[i, j] = tmp;
+                }
             }
         }
 
@@ -225,8 +228,8 @@ namespace GeneticAlgo
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine("Initial Matrix A: " + InitialA);
-            sb.AppendLine("Matrix A: " + A);
+            sb.AppendLine("Initial Matrix A: " + InitialA.ToString(1000,1000));
+            sb.AppendLine("Matrix A: " + A.ToString(1000, 1000));
             sb.AppendLine("Initial Matrix B: " + InitialB);
             sb.AppendLine("Vector B: " + B);
             sb.AppendLine("Initial Matrix C: " + InitialC);
